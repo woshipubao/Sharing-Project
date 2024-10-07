@@ -14,6 +14,10 @@
 - 파이썬 가상환경(3.8.10)
 - Tensorflow 2.4.0
 - Numpy 1.19.5
+- librosa 0.8.0
+- keras 2.40.0
+- typing-extensions 3.7.4
+- numba 0.53.1
 - Ipython, tensorflow-hub, soundfile, matplotlib, scipy
 
 ## 프로젝트 소개
