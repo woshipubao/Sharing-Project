@@ -11,7 +11,7 @@
 - PPT 작성 : 장현서
 
 ## 개발 환경
-- '파이썬 가상환경(3.8.10)'
+- 파이썬 가상환경(3.8.10)
 - Tensorflow 2.4.0
 - Numpy 1.19.5
 - Ipython, tensorflow-hub, soundfile, matplotlib, scipy
