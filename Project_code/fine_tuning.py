@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 
 # 데이터셋의 경로와 클래스 레이블을 CSV에 매핑
 data_dir = 'D:\Embedd Practice\sample_data'
-classes = ['car', 'human', 'cat']  # 레이블을 정의 및 클래스 추가
+classes = ['car_driving', 'car_horn', 'human', 'cat', 'dog']  # 레이블을 정의 및 클래스 추가
 
 # YAMNet 모델 로드
 yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')

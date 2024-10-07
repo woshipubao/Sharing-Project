@@ -13,7 +13,7 @@ yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
 model = load_model('audio_classification_model')
 
 # 클래스 레이블 정의
-classes = ['car', 'human', 'cat']
+classes = ['car', 'human', 'cat', 'dog']
 
 # 오디오 파일 처리 및 특징 추출
 def process_wav_file(file_path):
