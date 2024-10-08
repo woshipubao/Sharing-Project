@@ -1,4 +1,5 @@
 import os
+import shutil
 import tensorflow as tf
 import tensorflow_hub as hub
 import librosa
@@ -7,13 +8,43 @@ import csv
 import keras
 from scipy.io import wavfile
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+# 캐시 디렉토리 설정 및 정리, 모델 재학습 시 충돌 방지
+cache_dir = os.path.join(os.path.expanduser('~'), 'tfhub_modules')
+temp_cache_dir = os.path.join(os.environ.get('TEMP', '/tmp'), 'tfhub_modules')
+
+# 기존 캐시 삭제
+if os.path.exists(cache_dir):
+    shutil.rmtree(cache_dir)
+if os.path.exists(temp_cache_dir):
+    shutil.rmtree(temp_cache_dir)
+
+# 새 캐시 디렉토리 생성
+os.makedirs(cache_dir, exist_ok=True)
+
+# 환경 변수 설정
+os.environ['TFHUB_CACHE_DIR'] = cache_dir
+
+# YAMNet 모델 로드 - 대체 방법 사용
+try:
+    print("Attempting to load YAMNet model...")
+    yamnet_model = hub.KerasLayer('https://tfhub.dev/google/yamnet/1')
+    print("Model loaded successfully!")
+except Exception as e:
+    print(f"First attempt failed: {str(e)}")
+    try:
+        print("Trying alternative loading method...")
+        model_handle = 'https://tfhub.dev/google/yamnet/1'
+        yamnet_model = hub.load(model_handle)
+        print("Model loaded successfully with alternative method!")
+    except Exception as e:
+        print(f"Second attempt failed: {str(e)}")
+        raise
 
 # 데이터셋의 경로와 클래스 레이블을 CSV에 매핑
-data_dir = 'D:\Embedd Practice\sample_data'
+data_dir = 'D:\Embedd Project\sample_data'
 classes = ['car_driving', 'car_horn', 'human', 'cat', 'dog']  # 레이블을 정의 및 클래스 추가
-
-# YAMNet 모델 로드
-yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
 
 # wav 파일 로드 및 라벨링
 def load_data(data_dir, classes):
@@ -120,5 +151,42 @@ history = model.fit(
 test_loss, test_accuracy = model.evaluate(X_test, y_test)
 print(f"\n테스트 정확도: {test_accuracy:.4f}")
 
+# 학습 과정 시각화 함수
+def plot_training_history(history, save_dir='D:\Embedd Project\Project_code'):
+    # Accuracy 그래프
+    plt.figure(figsize=(12, 4))
+    
+    # subplot 1: Accuracy
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['accuracy'], label='Training Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Model Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend(loc='lower right')
+    plt.grid(True)
+    
+    # subplot 2: Loss
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Model Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend(loc='upper right')
+    plt.grid(True)
+    
+    # 그래프 레이아웃 조정
+    plt.tight_layout()
+    
+    # 그래프 저장
+    plt.savefig(os.path.join(save_dir, 'training_history.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"학습 히스토리 그래프가 저장되었습니다: {os.path.join(save_dir, 'training_history.png')}")
+
+# 학습 히스토리 시각화 및 저장
+plot_training_history(history)
+
 # 모델 저장
-model.save('audio_classification_model')
+model.save('D:\Embedd Project\audio_classification_model')

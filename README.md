@@ -13,12 +13,18 @@
 ## 개발 환경
 - 파이썬 가상환경(3.8.10)
 - Tensorflow 2.4.0
+- Tensorflow-hub 0.11.0
+- Tensorflow-io 0.17.0
 - Numpy 1.19.5
 - librosa 0.8.0
 - keras 2.40.0
 - typing-extensions 3.7.4
 - numba 0.53.1
-- Ipython, tensorflow-hub, soundfile, matplotlib, scipy
+- Ipython, soundfile, matplotlib, scipy
+
+## 사용 모델
+- YAMnet
+- 테스트 정확도: 0.9744
 
 ## 프로젝트 소개
 무선 이어폰의 주요 기능중 노이즈캔슬링으로 인한 보행자 사고가 발생하고 있다.
@@ -26,3 +32,4 @@
 
 ## 주요 기능
 자동차와 같은 위험 소리가 감지되면 자동으로 사용자의 노이즈캔슬링 기능을 일시적으로 비활성화한다.
+
