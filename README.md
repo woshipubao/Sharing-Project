@@ -1,5 +1,5 @@
 # 팀: 전전긍긍
-예스아이캔(deactivate-Noisecancling) 개발
+예스아이캔(deactivate-Noisecancling) 개발, 노캔을 줄여서 이를 반대하는 의미임
 
 ## 개발 기간
 - 24.09.20 ~ 24.10.08 (중간 보고)
