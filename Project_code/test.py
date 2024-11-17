@@ -10,7 +10,7 @@ from scipy.io import wavfile
 import scipy.signal
 
 # 모델 불러오기
-model = hub.load('https://tfhub.dev/google/yamnet/1')
+model = hub.load('https://www.kaggle.com/models/google/yamnet/TensorFlow2/yamnet/1')
 
 # 가장 높은 점수를 받은 클래스 찾기
 def class_names_from_csv(class_map_csv_text):
@@ -37,7 +37,7 @@ def ensure_sample_rate(original_sample_rate, waveform,
   return desired_sample_rate, waveform
 
 # wav 파일 불러오기'
-wav_file_name = 'D:\Embedd Practice\sample_data\car\car_horn7.wav'
+wav_file_name = r'D:\Embedd Project\sample_data\car_horn\car_horn7.wav'
 sample_rate, wav_data = wavfile.read(wav_file_name, 'rb')
 sample_rate, wav_data = ensure_sample_rate(sample_rate, wav_data)
 
