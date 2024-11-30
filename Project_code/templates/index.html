@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Audio Classifier</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #startButton {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #stopButton {
+            background-color: #f44336;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+        .prediction-item {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+        }
+        .confidence-bar {
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        .recording-indicator {
+            display: none;
+            color: red;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Real-time Audio Classifier</h1>
+        
+        <div class="recording-indicator">
+            <span class="blink">● Recording</span>
+        </div>
+
+        <div class="controls">
+            <button id="startButton">Start Recording</button>
+            <button id="stopButton">Stop Recording</button>
+        </div>
+
+        <div id="results">
+            <p>Waiting for audio input...</p>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        let updateInterval;
+
+        function startRecording() {
+            $.get('/start_recording', function(response) {
+                isRecording = true;
+                $('.recording-indicator').show();
+                updatePredictions();
+                updateInterval = setInterval(updatePredictions, 1000);
+            });
+        }
+
+        function stopRecording() {
+            $.get('/stop_recording', function(response) {
+                isRecording = false;
+                $('.recording-indicator').hide();
+                clearInterval(updateInterval);
+            });
+        }
+
+        function updatePredictions() {
+            $.get('/get_predictions', function(response) {
+                let resultsHtml = '';
+                
+                if (response.status === 'no_data') {
+                    resultsHtml = '<p>Waiting for audio input...</p>';
+                }
+                else if (response.status === 'below_threshold') {
+                    resultsHtml = `
+                        <p>No confident predictions</p>
+                        <p>Top confidence: ${response.top_confidence.toFixed(2)}%</p>
+                    `;
+                }
+                else if (response.status === 'success') {
+                    resultsHtml = '<h3>Top Predictions:</h3>';
+                    response.predictions.forEach((pred, index) => {
+                        resultsHtml += `
+                            <div class="prediction-item">
+                                <p>${index + 1}. ${pred.class}</p>
+                                <div class="confidence-bar" style="width: ${pred.confidence}%"></div>
+                                <p>Confidence: ${pred.confidence.toFixed(2)}%</p>
+                            </div>
+                        `;
+                    });
+                }
+                
+                $('#results').html(resultsHtml);
+            });
+        }
+
+        $(document).ready(function() {
+            $('#startButton').click(startRecording);
+            $('#stopButton').click(stopRecording);
+        });
+    </script>
+</body>
+</html>
