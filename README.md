@@ -12,10 +12,11 @@
 
 ## 개발 환경
 - 파이썬 가상환경(3.8.10)
-- Tensorflow 2.4.0
+- Tensorflow 2.8.0
 - Tensorflow-hub 0.11.0
 - Tensorflow-io 0.17.0
-- Numpy 1.19.5
+- Numpy 1.23.5
+- h5py 3.1.0
 - librosa 0.8.0
 - keras 2.4.0
 - typing-extensions 3.7.4.3
