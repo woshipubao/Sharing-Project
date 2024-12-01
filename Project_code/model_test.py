@@ -12,7 +12,7 @@ yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
 model = load_model(r'D:\Embedd Project\audio_classification_model')
 
 # 클래스 레이블 정의
-classes = ['car_driving', 'car_horn', 'human', 'cat', 'dog']
+classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
 
 # 오디오 파일 처리 및 특징 추출
 def process_wav_file(file_path):

@@ -27,7 +27,7 @@ class RealtimeAudioClassifier:
         # 분류 모델 로드
         print("Loading classification model...")
         self.model = load_model(r'D:\Embedd Project\audio_classification_model')
-        self.classes = ['car_driving', 'car_horn', 'human', 'cat', 'dog']
+        self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
 
         # PyAudio 초기화
         self.audio = pyaudio.PyAudio()
