@@ -13,18 +13,16 @@
 
 ## 개발 환경
 - 파이썬 가상환경(3.8.10)
-- Tensorflow 2.8.0
-- Tensorflow-hub 0.11.0
-- Tensorflow-io 0.17.0
+- Tensorflow 2.10.0
 - Numpy 1.23.5
 - h5py 3.1.0
 - librosa 0.8.0
-- keras 2.4.0
+- keras 2.10.0
 - typing-extensions 3.7.4.3
 - numba 0.53.1
 - Ipython 7.16.1 
 - flask 2.0.1
-- soundfile, matplotlib, scipy
+- soundfile, matplotlib, scipy, pyaudio
 
 ## 사용 모델
 - YAMnet
