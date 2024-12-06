@@ -9,6 +9,7 @@ import librosa
 import threading
 import queue
 import time
+import os
 
 app = Flask(__name__)
 
@@ -31,7 +32,11 @@ class AudioClassifier:
         # 모델 로드
         print("Loading models...")
         self.yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
-        self.model = load_model(r'D:\Embedded Project\audio_classification_model')
+
+        current_dir = os.getcwd()
+        model_path = os.path.join(current_dir, 'audio_classification_model')
+        self.model = load_model(model_path)
+        
         self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
         
         self.audio = pyaudio.PyAudio()
