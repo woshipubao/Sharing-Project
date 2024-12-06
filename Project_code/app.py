@@ -45,6 +45,7 @@ class AudioClassifier:
         
     def process_audio(self, audio_data):
         try:
+            audio_data = librosa.effects.preemphasis(audio_data, coef=0.97)
             audio_data = librosa.util.normalize(audio_data)
             
             target_length = 48000
