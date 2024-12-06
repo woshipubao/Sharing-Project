@@ -31,7 +31,7 @@ class AudioClassifier:
         # 모델 로드
         print("Loading models...")
         self.yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
-        self.model = load_model(r'D:\Embedd Project\audio_classification_model')
+        self.model = load_model(r'D:\Embedded Project\audio_classification_model')
         self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
         
         self.audio = pyaudio.PyAudio()

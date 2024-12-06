@@ -43,7 +43,7 @@ except Exception as e:
         raise
 
 # 데이터셋의 경로와 클래스 레이블을 CSV에 매핑
-data_dir = 'D:\Embedd Project\sample_data'
+data_dir = 'D:\Embedded Project\sample_data'
 classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']  # 레이블을 정의 및 클래스 추가
 
 # wav 파일 로드 및 라벨링
@@ -152,7 +152,7 @@ test_loss, test_accuracy = model.evaluate(X_test, y_test)
 print(f"\n테스트 정확도: {test_accuracy:.4f}")
 
 # 학습 과정 시각화 함수
-def plot_training_history(history, save_dir='D:\Embedd Project\Project_code'):
+def plot_training_history(history, save_dir='D:\Embedded Project\Project_code'):
     # Accuracy 그래프
     plt.figure(figsize=(12, 4))
     
@@ -189,4 +189,4 @@ def plot_training_history(history, save_dir='D:\Embedd Project\Project_code'):
 plot_training_history(history)
 
 # 모델 저장
-model.save(r'D:\Embedd Project\audio_classification_model')
+model.save(r'D:\Embedded Project\audio_classification_model')

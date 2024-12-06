@@ -37,7 +37,7 @@ def ensure_sample_rate(original_sample_rate, waveform,
   return desired_sample_rate, waveform
 
 # wav 파일 불러오기'
-wav_file_name = r'D:\Embedd Project\sample_data\car_horn\car_horn7.wav'
+wav_file_name = r'D:\Embedded Project\sample_data\car_horn\car_horn7.wav'
 sample_rate, wav_data = wavfile.read(wav_file_name, 'rb')
 sample_rate, wav_data = ensure_sample_rate(sample_rate, wav_data)
 

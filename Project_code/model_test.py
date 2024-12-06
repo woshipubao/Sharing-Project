@@ -9,7 +9,7 @@ from keras.models import load_model
 yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
 
 # 저장된 모델 로드
-model = load_model(r'D:\Embedd Project\audio_classification_model')
+model = load_model(r'D:\Embedded Project\audio_classification_model')
 
 # 클래스 레이블 정의
 classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
