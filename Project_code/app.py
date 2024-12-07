@@ -27,6 +27,8 @@ class AudioClassifier:
         self.RATE = 16000
         self.RECORD_SECONDS = 3
         self.CONFIDENCE_THRESHOLD = 50.0
+        self.high_risk_sounds = ['car_horn', 'siren'] # 고위험군 사운드
+        self.medium_risk_sounds = ['car_driving', 'construction_site'] # 경고 필요 사운드
 
         # 모델 로드
         print("Loading models...")
@@ -54,6 +56,7 @@ class AudioClassifier:
                 audio_data = audio_data[:target_length]
 
             waveform = tf.cast(audio_data, dtype=tf.float32)
+
             scores, embeddings, spectrogram = self.yamnet_model(waveform)
             features = tf.reduce_mean(embeddings, axis=0)
             
@@ -69,11 +72,33 @@ class AudioClassifier:
                 for idx in top_3_indices
             ]
 
-            return top_3_predictions
+            top_prediction = self.classes[top_3_indices[0]]
+            confidence = float(prediction[0][top_3_indices[0]] * 100)
+
+            risk_level = 'safe'
+            messege = "안전하게 노이즈캔슬링 기능을 사용하실 수 있습니다"
+
+            if confidence >= self.CONFIDENCE_THRESHOLD:
+                if top_prediction in self.high_risk_sounds:
+                    risk_level = 'high'
+                    messege = "노이즈 캔슬링 사용을 중지합니다"
+                elif top_prediction in self.medium_risk_sounds:
+                    risk_level = 'medium'
+                    messege = "노이즈 캔슬링 사용에 주의가 필요합니다"
+
+            return {
+                'predictions': top_3_predictions,
+                'risk_level': risk_level,
+                'message': messege
+            }
 
         except Exception as e:
             print(f"Error in processing audio: {str(e)}")
-            return []
+            return {
+                'predictions': [],
+                'risk_level': 'safe',
+                'message': "오디오 처리 중 오류가 발생했습니다"
+            }
 
     def audio_callback(self, in_data, frame_count, time_info, status):
         if self.is_recording:
@@ -139,19 +164,25 @@ def get_predictions():
        time.time() - latest_predictions['timestamp'] > 5:
         return jsonify({
             'status': 'no_data',
-            'predictions': []
+            'predictions': [],
+            'risk_level': 'safe',
+            'message': "안전하게 노이즈캔슬링 기능을 사용하실 수 있습니다"
         })
 
-    predictions = latest_predictions['predictions']
-    if not predictions or predictions[0]['confidence'] < classifier.CONFIDENCE_THRESHOLD:
+    result = latest_predictions['predictions']
+    if not result['predictions'] or result['predictions'][0]['confidence'] < classifier.CONFIDENCE_THRESHOLD:
         return jsonify({
             'status': 'below_threshold',
-            'top_confidence': predictions[0]['confidence'] if predictions else 0
+            'top_confidence': result['predictions'][0]['confidence'] if result['predictions'] else 0,
+            'risk_level': 'safe',
+            'message': "안전하게 노이즈캔슬링 기능을 사용하실 수 있습니다"
         })
 
     return jsonify({
         'status': 'success',
-        'predictions': predictions
+        'predictions': result['predictions'],
+        'risk_level': result['risk_level'],
+        'message': result['message']
     })
 
 if __name__ == '__main__':
