@@ -9,7 +9,9 @@ from keras.models import load_model
 yamnet_model = hub.load('https://tfhub.dev/google/yamnet/1')
 
 # 저장된 모델 로드
-model = load_model(r'D:\Embedd Project\audio_classification_model')
+current_dir = os.getcwd()
+model_path = os.path.join(current_dir, 'audio_classification_model')
+model = load_model(model_path)
 
 # 클래스 레이블 정의
 classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
@@ -99,5 +101,5 @@ def process_directory(directory_path):
         print(f"\nOverall Accuracy: {overall_accuracy:.2f}%")
 
 # 테스트 실행
-test_directory = r'D:\Embedd Project\real_data'
+test_directory =os.path.join(current_dir, 'real_data')
 process_directory(test_directory)

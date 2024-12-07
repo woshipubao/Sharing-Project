@@ -26,7 +26,9 @@ class RealtimeAudioClassifier:
         
         # 분류 모델 로드
         print("Loading classification model...")
-        self.model = load_model(r'D:\Embedd Project\audio_classification_model')
+        current_dir = os.getcwd()
+        model_path = os.path.join(current_dir, 'audio_classification_model')
+        self.model = load_model(model_path)
         self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
 
         # PyAudio 초기화
@@ -78,6 +80,8 @@ class RealtimeAudioClassifier:
     def process_audio(self, audio_data):
         try:
             # 입력 장치 노이즈 줄이기
+            audio_data = librosa.effects.preemphasis(audio_data, coef=0.97)
+            # 노이즈 감소를 위한 필터핑 수행
             audio_data = librosa.effects.preemphasis(audio_data, coef=0.97)
             # 오디오 정규화
             audio_data = librosa.util.normalize(audio_data)

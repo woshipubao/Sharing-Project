@@ -3,7 +3,7 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import numpy as np
 import csv
-
+import os
 import matplotlib.pyplot as plt
 from IPython.display import Audio
 from scipy.io import wavfile
@@ -37,9 +37,12 @@ def ensure_sample_rate(original_sample_rate, waveform,
   return desired_sample_rate, waveform
 
 # wav 파일 불러오기'
-wav_file_name = r'D:\Embedd Project\sample_data\car_horn\car_horn7.wav'
-sample_rate, wav_data = wavfile.read(wav_file_name, 'rb')
+current_dir = os.getcwd()
+wav_file_path = os.path.join(current_dir, 'sample_rate', 'car_horn', 'car_horn7.wav')
+
+sample_rate, wav_data = wavfile.read(wav_file_path, 'rb')
 sample_rate, wav_data = ensure_sample_rate(sample_rate, wav_data)
+
 
 # Show some basic information about the audio.
 duration = len(wav_data)/sample_rate
