@@ -77,6 +77,8 @@ class RealtimeAudioClassifier:
 
     def process_audio(self, audio_data):
         try:
+            # 입력 장치 노이즈 줄이기
+            audio_data = librosa.effects.preemphasis(audio_data, coef=0.97)
             # 오디오 정규화
             audio_data = librosa.util.normalize(audio_data)
             
