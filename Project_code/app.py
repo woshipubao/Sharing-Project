@@ -26,7 +26,7 @@ class AudioClassifier:
         self.CHANNELS = 1
         self.RATE = 16000
         self.RECORD_SECONDS = 3
-        self.CONFIDENCE_THRESHOLD = 70.0
+        self.CONFIDENCE_THRESHOLD = 50.0
 
         # 모델 로드
         print("Loading models...")
@@ -34,7 +34,7 @@ class AudioClassifier:
 
         current_dir = os.getcwd()
         model_path = os.path.join(current_dir, 'audio_classification_model')
-        self.model = tf.keras.modelsload_model(model_path)
+        self.model = tf.keras.models.load_model(model_path)
         
         self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site', 'siren']
         

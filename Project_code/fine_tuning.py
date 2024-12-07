@@ -42,6 +42,31 @@ except Exception as e:
         print(f"Second attempt failed: {str(e)}")
         raise
 
+# Class weight 계산 함수 추가
+def compute_class_weights(labels):
+    from sklearn.utils.class_weight import compute_class_weight
+    unique_classes = np.unique(labels)
+    class_weights = compute_class_weight(
+        class_weight = 'balanced',
+        classes = unique_classes,
+        y = labels
+    )
+    return dict(zip(unique_classes, class_weights))
+
+# 오디오 데이터 증강 함수 추가
+def augment_audio(waveform):
+    augmented = []
+    # 기존 증강에 추가:
+    # 볼륨 변경
+    augmented.append(waveform * np.random.uniform(0.8, 1.2))
+    # 시간 역전
+    augmented.append(waveform[::-1])
+    # 다양한 노이즈 레벨
+    for noise_level in [0.003, 0.005, 0.007]:
+        noise = np.random.normal(0, noise_level, len(waveform))
+        augmented.append(waveform + noise)
+    return augmented
+
 # 데이터셋의 경로와 클래스 레이블을 CSV에 매핑
 current_dir = os.getcwd()
 data_dir = os.path.join(current_dir, 'sample_data')  # 상대 경로로 변경
@@ -63,7 +88,9 @@ def load_data(data_dir, classes):
 wav_files, labels = load_data(data_dir, classes)
 
 # Train/Test Split
-train_files, test_files, train_labels, test_labels = train_test_split(wav_files, labels, test_size=0.2)
+train_files, test_files, train_labels, test_labels = train_test_split(
+    wav_files, labels, test_size=0.25, stratify=labels, random_state=42
+)
 
 # 오디오 로드 및 처리
 def process_wav_file(file_path):
@@ -96,25 +123,40 @@ def extract_features(waveform, sample_rate):
     return tf.reduce_mean(embeddings, axis=0)
 
 # 데이터셋 준비
-def prepare_dataset(files):
+def prepare_dataset(files, labels, augment=False):
     features = []
-    for file in files:
+    final_labels = []
+
+    for file, label in zip(files, labels):
         try:
             print(f"Processing file: {file}")  # 진행 상황 출력
             waveform, sample_rate = process_wav_file(file)
-            feature = extract_features(waveform, sample_rate)
-            features.append(feature.numpy())
+
+            if augment and len(files) < 50: # 50개 미만인 클래스만 증강
+                augment_waveforms = augment_audio(waveform)
+                for aug_waveform in augment_waveforms:
+                    feature = extract_features(aug_waveform, sample_rate)
+                    features.append(feature.numpy())
+                    final_labels.append(label)
+            else:
+                feature = extract_features(waveform, sample_rate)
+                features.append(feature.numpy())
+                final_labels.append(label)
+
         except Exception as e:
             print(f"Error processing file {file}: {str(e)}")
             continue
-    return np.array(features)
+
+    return np.array(features), np.array(final_labels)
 
 # 특징 추출
 print("특징 추출 시작...")
-X_train = prepare_dataset(train_files)
-X_test = prepare_dataset(test_files)
-y_train = np.array(train_labels)
-y_test = np.array(test_labels)
+X_train, y_train = prepare_dataset(train_files, train_labels, augment=True)
+X_test, y_test = prepare_dataset(test_files, test_labels, augment=False)
+
+# 클래스 가중치 계산
+class_weights = compute_class_weights(y_train)
+print("Class weights:", class_weights)
 
 # 데이터가 비어있지 않은지 확인
 if len(X_train) == 0 or len(X_test) == 0:
@@ -123,18 +165,83 @@ if len(X_train) == 0 or len(X_test) == 0:
 print(f"훈련 데이터 형태: {X_train.shape}")
 print(f"테스트 데이터 형태: {X_test.shape}")
 
-# 분류 모델 정의
+# 분류 모델 정의 및 정규화 추가
 model = keras.Sequential([
-    keras.layers.Dense(512, activation='relu', input_shape=(1024,)),
+    keras.layers.Dense(512, activation='relu', input_shape=(1024,),
+                      kernel_regularizer=tf.keras.regularizers.l2(0.005)),  # L2 규제 완화
     keras.layers.Dropout(0.3),
-    keras.layers.Dense(256, activation='relu'),
+    keras.layers.BatchNormalization(),
+    keras.layers.Dense(256, activation='relu',
+                      kernel_regularizer=tf.keras.regularizers.l2(0.005)),
     keras.layers.Dropout(0.3),
+    keras.layers.BatchNormalization(),
+    keras.layers.Dense(128, activation='relu',
+                      kernel_regularizer=tf.keras.regularizers.l2(0.005)),
     keras.layers.Dense(len(classes), activation='softmax')
 ])
 
+# 2. 데이터 증강은 유지하되 노이즈 수준을 조절
+def augment_audio(waveform):
+    augmented = []
+    augmented.append(waveform)
+    
+    # 노이즈 레벨 낮춤
+    noise = np.random.normal(0, 0.003, len(waveform))
+    augmented.append(waveform + noise)
+    
+    # 시간 스트레칭 범위 조절
+    stretched = librosa.effects.time_stretch(waveform, rate=0.95)
+    augmented.append(stretched[:len(waveform)])
+    
+    # 피치 시프트 범위 조절
+    pitched = librosa.effects.pitch_shift(waveform, sr=16000, n_steps=1)
+    augmented.append(pitched)
+    
+    return augmented
+
+# 3. 학습 파라미터 최적화
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+
+lr_schedule = tf.keras.callbacks.ReduceLROnPlateau(
+    monitor='val_loss',
+    factor=0.3,
+    patience=4,
+    min_lr=0.0001,
+    verbose=1
+)
+
+early_stopping = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss',
+    patience=8,  # 더 길게 학습할 기회 제공
+    restore_best_weights=True,
+    verbose=1
+)
+
+# 4. 데이터셋 분할 비율 조정
+train_files, test_files, train_labels, test_labels = train_test_split(
+    wav_files, labels, test_size=0.25, stratify=labels, random_state=42
+)
+
+# 학습률 스케줄러 추가
+lr_schedule = tf.keras.callbacks.ReduceLROnPlateau(
+    monitor='val_loss',
+    factor=0.3,
+    patience=4,
+    min_lr=0.0001,
+    verbose=1
+)
+
+# Early stopping 추가
+early_stopping = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss',
+    patience=8,
+    restore_best_weights=True,
+    verbose=1
+)
+
 # 모델 컴파일
 model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),
     loss='sparse_categorical_crossentropy',
     metrics=['accuracy']
 )
@@ -145,7 +252,9 @@ history = model.fit(
     X_train, y_train,
     validation_data=(X_test, y_test),
     epochs=50,
-    batch_size=32
+    batch_size=16,  # 배치 크기 줄임
+    class_weight=class_weights,  # 클래스 가중치 적용
+    callbacks=[lr_schedule, early_stopping]
 )
 
 # 모델 평가
