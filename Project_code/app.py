@@ -4,7 +4,6 @@ import pyaudio
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
-from tensorflow.keras.models import load_model
 import librosa
 import threading
 import queue
@@ -35,9 +34,9 @@ class AudioClassifier:
 
         current_dir = os.getcwd()
         model_path = os.path.join(current_dir, 'audio_classification_model')
-        self.model = load_model(model_path)
+        self.model = tf.keras.modelsload_model(model_path)
         
-        self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
+        self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site', 'siren']
         
         self.audio = pyaudio.PyAudio()
         self.stream = None

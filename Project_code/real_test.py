@@ -7,7 +7,6 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import librosa
 import soundfile as sf
-from tensorflow.keras.models import load_model
 import time
 
 class RealtimeAudioClassifier:
@@ -28,8 +27,8 @@ class RealtimeAudioClassifier:
         print("Loading classification model...")
         current_dir = os.getcwd()
         model_path = os.path.join(current_dir, 'audio_classification_model')
-        self.model = load_model(model_path)
-        self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site']
+        self.model = tf.keras.models.load_model(model_path)
+        self.classes = ['car_driving', 'car_horn', 'human_laugh', 'human_talk', 'cat', 'dog', 'construction_site', 'siren']
 
         # PyAudio 초기화
         self.audio = pyaudio.PyAudio()
